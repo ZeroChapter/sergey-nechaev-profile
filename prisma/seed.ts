@@ -20,11 +20,20 @@ const profileData = {
 
 const experiences = [
   {
-    company: 'Independent',
-    role: 'TypeScript Backend Developer',
-    startDate: new Date('2024-01-01'),
+    company: 'АйТиГуру',
+    role: 'Frontend Developer',
+    startDate: new Date('2025-08-01'),
+    endDate: new Date('2026-08-04'),
+    description:
+      'Разрабатывал большую торговую B2B платформу в составе команды разработчиков. Рефакторил старый код, переводил клиентское приложение на новый стек. Ext Js, JavaScript, TypeScript, React, Zustand.',
+  },
+  {
+    company: 'Art Nexus',
+    role: 'Fullstack Developer',
+    startDate: new Date('2024-04-01'),
     endDate: null,
-    description: 'NestJS, Prisma, GraphQL and relational databases.',
+    description:
+      'Разработчик интернет-магазина дизайнерской одежды. За время существования проекта он пережил переезд с React на Next.js, в плаах также рефакторинг бекэнда и переезд на NestJS.',
   },
 ];
 
