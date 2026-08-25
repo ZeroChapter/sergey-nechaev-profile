@@ -1,4 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Skill } from '../skill/skill.model';
 
 @ObjectType()
 export class Project {
@@ -14,6 +15,9 @@ export class Project {
   @Field(() => String, { nullable: true })
   url?: string | null;
 
-  @Field(() => String, { nullable: true })
-  repoUrl?: string | null;
+  @Field(() => [String])
+  repoUrl: string[];
+
+  @Field(() => [Skill])
+  skills: Skill[];
 }

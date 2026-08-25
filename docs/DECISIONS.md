@@ -227,21 +227,24 @@ Ownership:
 - Project belongs to Profile;
 - Skill belongs to Profile.
 
-There is no Project–Skill or Experience–Skill association in the initial model.
+Project may reference skills that already belong to the same Profile (many-to-many).
+
+There is no Experience–Skill association.
 
 ### Context
 
-`PROJECT.md` limits the initial domain to these four conceptual entities and forbids extra entities without a real requirement. The product is one public professional profile.
+`PROJECT.md` limits the initial domain to these four conceptual entities and forbids extra entities without a real requirement. The product is one public professional profile. Seed content now needs each project to show which of the profile skills it used.
 
 ### Rationale
 
-Profile as the aggregate root matches the singleton business card and the nested `profile` query. Extra join entities (for example project skills) can be added later if a real UI or API need appears.
+Profile remains the aggregate root. Skills stay unique per profile. A project does not own copies of skill names; it points at existing Skill rows. An implicit Prisma many-to-many is enough: the link has no extra fields.
 
 ### Consequences
 
-- Prisma relations are Profile 1-N Experience, Profile 1-N Project, Profile 1-N Skill.
-- Do not introduce User, Tag, Company, or other entities unless a later decision records them.
-- Skill names are scoped to the single Profile; uniqueness, if any, is per profile, not global multi-tenant uniqueness.
+- Prisma relations are Profile 1-N Experience, Profile 1-N Project, Profile 1-N Skill, and Project M-N Skill.
+- Do not introduce User, Tag, Company, or a `ProjectSkill` entity unless the link itself gains fields.
+- Skill names are scoped to the single Profile (`@@unique([profileId, name])`).
+- Seed connects projects to skills by that unique name, not by hand-written IDs.
 
 ---
 
@@ -323,3 +326,29 @@ A URL field demonstrates that an avatar can be presented without operating a sto
 - Do not add AWS/MinIO SDKs, buckets, or multipart upload endpoints.
 - Avatar, if present, is an optional string URL on Profile.
 - Hosting of the actual image file is outside the application.
+
+---
+
+## 13. Project–Skill many-to-many
+
+### Decision
+
+A project lists the profile skills used on it through a Prisma implicit many-to-many relation.
+
+GraphQL exposes `project.skills`. It does not expose `skill.projects`.
+
+There is still no Experience–Skill relation.
+
+### Context
+
+The public profile is a business card: visitors should see both the full skill list and which skills belong to which project. Decision 9 originally deferred this join; the seed content now requires it.
+
+### Rationale
+
+Connecting existing `Skill` rows avoids duplicated names and keeps one source of truth. Omitting `skill.projects` keeps the `profile` query a simple tree without a graph cycle.
+
+### Consequences
+
+- `Project.skills` and `Skill.projects` exist in Prisma.
+- The GraphQL `Project` type includes `skills: [Skill!]!`.
+- Seed data refers to skills by `name` (plus profile id), never by a slug or hardcoded UUID.

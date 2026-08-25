@@ -28,54 +28,117 @@ const experiences = [
   },
 ];
 
-const projects = [
-  {
-    name: 'Digital developer profile',
-    summary: 'Public GraphQL business card built with NestJS and Prisma.',
-    url: null,
-    repoUrl: 'https://github.com/ZeroChapter/sergey-nechaev-profile',
-  },
-];
-
 const skills = [
   { name: 'TypeScript' },
+  { name: 'React' },
   { name: 'NestJS' },
   { name: 'Prisma' },
   { name: 'GraphQL' },
+  { name: 'Docker' },
+  { name: 'Git' },
+  { name: 'Next.js' },
+  { name: 'Tailwind CSS' },
+  { name: 'HTML' },
+  { name: 'CSS' },
+  { name: 'JavaScript' },
+  { name: 'Node.js' },
+  { name: 'MongoDB' },
 ];
+
+const projects = [
+  {
+    name: 'Art Nexus',
+    summary:
+      'Интернет магазин дизайнерской одежды. Фронтенд - Next.js, бэкенд - Express, база данных - MongoDB.',
+    url: 'https://art-nexus.ru/',
+    repoUrl: [
+      'https://github.com/ZeroChapter/sergey-nechaev-profile',
+      'https://github.com/ZeroChapter/Art-nexus-back',
+      'https://github.com/ZeroChapter/ArtNexusAdmin',
+    ],
+    skillNames: [
+      'TypeScript',
+      'JavaScript',
+      'Next.js',
+      'Node.js',
+      'MongoDB',
+      'HTML',
+      'CSS',
+      'Git',
+    ],
+  },
+  {
+    name: 'CV Сергей Нечаев',
+    summary:
+      'Мой личный сайт-портфолио. Фронтенд - Astro, бэкенд и БД в проекте отсутствуют.',
+    url: 'https://cv-lending.vercel.app/ru/',
+    repoUrl: ['https://github.com/ZeroChapter/CV_lending'],
+    skillNames: ['TypeScript', 'JavaScript', 'HTML', 'CSS', 'Git'],
+  },
+  {
+    name: 'Заигрыш',
+    summary:
+      'Проект для музыкальных встречь и обучению народной музыке. В проекте я выступал в роли frontend разработчика (репозиторий закрыт по просьбе заказчика).',
+    url: 'https://заигрыш.рф/',
+    repoUrl: ['https://gitlab.com/rustrad-projects/Rustrad'],
+    skillNames: [
+      'TypeScript',
+      'JavaScript',
+      'Next.js',
+      'HTML',
+      'Tailwind CSS',
+      'Git',
+    ],
+  },
+];
+
+function connectSkills(profileId: string, skillNames: string[]) {
+  return {
+    connect: skillNames.map((name) => ({
+      profileId_name: { profileId, name },
+    })),
+  };
+}
 
 async function main() {
   try {
     const existingProfile = await prisma.profile.findFirst();
 
-    if (existingProfile) {
-      await prisma.profile.update({
-        where: { id: existingProfile.id },
-        data: {
-          ...profileData,
-          experiences: {
-            deleteMany: {},
-            create: experiences,
+    const profile = existingProfile
+      ? await prisma.profile.update({
+          where: { id: existingProfile.id },
+          data: {
+            ...profileData,
+            projects: { deleteMany: {} },
           },
-          projects: {
-            deleteMany: {},
-            create: projects,
-          },
-          skills: {
-            deleteMany: {},
-            create: skills,
-          },
-        },
-      });
-      return;
-    }
+        })
+      : await prisma.profile.create({
+          data: profileData,
+        });
 
-    await prisma.profile.create({
+    await prisma.profile.update({
+      where: { id: profile.id },
       data: {
-        ...profileData,
-        experiences: { create: experiences },
-        projects: { create: projects },
-        skills: { create: skills },
+        experiences: {
+          deleteMany: {},
+          create: experiences,
+        },
+        skills: {
+          deleteMany: {},
+          create: skills,
+        },
+      },
+    });
+
+    await prisma.profile.update({
+      where: { id: profile.id },
+      data: {
+        projects: {
+          create: projects.map(({ skillNames, ...project }) => ({
+            ...project,
+            skills: connectSkills(profile.id, skillNames),
+          })),
+        },
       },
     });
   } finally {

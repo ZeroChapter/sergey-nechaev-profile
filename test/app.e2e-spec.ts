@@ -28,7 +28,13 @@ describe('Profile GraphQL (e2e)', () => {
             blog: null,
             avatarUrl: null,
             experiences: [],
-            projects: [],
+            projects: [
+              {
+                id: 'project-1',
+                name: 'Art Nexus',
+                skills: [{ id: 'skill-1', name: 'TypeScript' }],
+              },
+            ],
             skills: [{ id: 'skill-1', name: 'TypeScript' }],
           }),
         },
@@ -43,16 +49,26 @@ describe('Profile GraphQL (e2e)', () => {
     const response = await request(app.getHttpServer())
       .post('/graphql')
       .send({
-        query: '{ profile { name skills { name } } }',
+        query:
+          '{ profile { name skills { name } projects { name skills { name } } } }',
       })
       .expect(200);
 
     const body = response.body as {
-      data: { profile: { name: string; skills: { name: string }[] } };
+      data: {
+        profile: {
+          name: string;
+          skills: { name: string }[];
+          projects: { name: string; skills: { name: string }[] }[];
+        };
+      };
     };
 
     expect(body.data.profile.name).toBe('Нечаев Сергей');
     expect(body.data.profile.skills).toEqual([{ name: 'TypeScript' }]);
+    expect(body.data.profile.projects[0].skills).toEqual([
+      { name: 'TypeScript' },
+    ]);
   });
 
   afterEach(async () => {

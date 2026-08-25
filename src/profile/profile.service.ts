@@ -9,7 +9,10 @@ export class ProfileService {
     return this.prisma.profile.findFirst({
       include: {
         experiences: { orderBy: { startDate: 'desc' } },
-        projects: { orderBy: { name: 'asc' } },
+        projects: {
+          orderBy: { name: 'asc' },
+          include: { skills: { orderBy: { name: 'asc' } } },
+        },
         skills: { orderBy: { name: 'asc' } },
       },
     });

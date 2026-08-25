@@ -36,19 +36,21 @@ model Experience {
 }
 
 model Project {
-  id          String  @id @default(uuid())
-  name        String
-  summary     String?
-  url         String?
-  repoUrl     String?
+  id      String   @id @default(uuid())
+  name    String
+  summary String?
+  url     String?
+  repoUrl String[]
+  skills  Skill[]
 
   profileId String
   profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 }
 
 model Skill {
-  id   String @id @default(uuid())
-  name String
+  id       String    @id @default(uuid())
+  name     String
+  projects Project[]
 
   profileId String
   profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)

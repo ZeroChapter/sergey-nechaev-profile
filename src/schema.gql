@@ -32,7 +32,8 @@ type Profile {
 type Project {
   id: ID!
   name: String!
-  repoUrl: String
+  repoUrl: [String!]!
+  skills: [Skill!]!
   summary: String
   url: String
 }

@@ -28,7 +28,10 @@ describe('ProfileService', () => {
     expect(findFirst).toHaveBeenCalledWith({
       include: {
         experiences: { orderBy: { startDate: 'desc' } },
-        projects: { orderBy: { name: 'asc' } },
+        projects: {
+          orderBy: { name: 'asc' },
+          include: { skills: { orderBy: { name: 'asc' } } },
+        },
         skills: { orderBy: { name: 'asc' } },
       },
     });
