@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider     = "prisma-client"
   output       = "../generated/prisma"
@@ -14,11 +9,49 @@ datasource db {
 }
 
 model Profile {
-  id String @id @default(uuid())
-  name String
-  email String @unique
-  phone String
-  github String? 
-  blog String?
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  phone     String
+  github    String?
+  blog      String?
+  avatarUrl String?
   createdAt DateTime @default(now())
+
+  experiences Experience[]
+  projects    Project[]
+  skills      Skill[]
+}
+
+model Experience {
+  id          String    @id @default(uuid())
+  company     String
+  role        String
+  startDate   DateTime
+  endDate     DateTime?
+  description String?
+
+  profileId String
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Project {
+  id          String  @id @default(uuid())
+  name        String
+  summary     String?
+  url         String?
+  repoUrl     String?
+
+  profileId String
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Skill {
+  id   String @id @default(uuid())
+  name String
+
+  profileId String
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, name])
 }
