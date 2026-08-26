@@ -87,6 +87,7 @@ async function bootstrap() {
   await new Promise<void>((resolve, reject) => {
     httpServer.once('error', reject);
     httpServer.listen(port, '0.0.0.0', () => {
+      console.log(`Listening on 0.0.0.0:${port}`);
       resolve();
     });
   });
