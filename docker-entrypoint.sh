@@ -24,4 +24,4 @@ if [ "${SKIP_EMBEDDED_COCKROACH:-}" != "true" ]; then
     --background
 fi
 
-exec node dist/main
+exec node dist/src/main.js

@@ -22,7 +22,7 @@ const isProduction = process.env.NODE_ENV === 'production';
     ...(isProduction
       ? [
           ServeStaticModule.forRoot({
-            rootPath: join(__dirname, '..', 'client', 'dist'),
+            rootPath: join(process.cwd(), 'client', 'dist'),
             exclude: ['/graphql', '/graphql/(.*)'],
           }),
         ]
