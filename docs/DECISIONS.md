@@ -352,3 +352,31 @@ Connecting existing `Skill` rows avoids duplicated names and keeps one source of
 - `Project.skills` and `Skill.projects` exist in Prisma.
 - The GraphQL `Project` type includes `skills: [Skill!]!`.
 - Seed data refers to skills by `name` (plus profile id), never by a slug or hardcoded UUID.
+
+---
+
+## 14. Frontend: Vite + React in `client/`
+
+### Decision
+
+The public UI is a Vite + React + TypeScript app in `client/`.
+
+It loads the singleton profile with one `fetch` to `POST /graphql`. There is no Next.js, Apollo Client, router, or design system.
+
+Locally Vite proxies `/graphql` to the Nest API (`http://localhost:3000`). Production hosting of the built static files is a later deploy step, not extra frontend architecture.
+
+This supersedes Decision 2 where the frontend was deferred until after a stable GraphQL API.
+
+### Context
+
+The assignment needs a visible card, not a second product. Deploy convenience matters: a static Vite build can later sit next to Nest in one image without a separate Node UI runtime.
+
+### Rationale
+
+React + Vite is familiar next to Nest, cheap to run, and does not pull in SSR or a GraphQL client for a single query. Next.js would add a second server and a more expensive deploy story.
+
+### Consequences
+
+- Do not add routing, state libraries, CSS frameworks, or GraphQL codegen unless a concrete UI need appears.
+- The client talks to the existing `profile` query only.
+- Nest does not serve `client/dist` until deploy wiring is actually needed.

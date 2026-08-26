@@ -11,6 +11,7 @@ API только для чтения. Данные меняются через P
 - Prisma
 - CockroachDB
 - Docker Compose (база)
+- Vite + React (статический клиент в `client/`)
 
 ## Требования
 
@@ -25,14 +26,24 @@ cd sergey-nechaev-profile
 copy .env.example .env
 docker compose up -d
 npm install
+npm --prefix client install
 npx prisma migrate deploy
 npx prisma generate
 npx prisma db seed
 npm run start:dev
 ```
 
-Приложение: http://localhost:3000  
+Во втором терминале:
+
+```powershell
+npm run client:dev
+```
+
+API: http://localhost:3000  
 GraphQL (GraphiQL): http://localhost:3000/graphql  
+Визитка: http://localhost:5173  
+
+Локально Vite проксирует `/graphql` на API.
 
 Cockroach UI: http://localhost:8080
 
@@ -87,5 +98,8 @@ Cockroach UI: http://localhost:8080
 | `npm run test:e2e` | GraphQL e2e |
 | `npx prisma db seed` | Заполнить/обновить данные профиля |
 | `npx prisma studio` | Просмотр БД |
+| `npm run client:dev` | Фронт Vite, http://localhost:5173 |
+| `npm run client:build` | Сборка статики в `client/dist` |
+| `npm --prefix client run lint` | ESLint Airbnb для `client/src` |
 
 Изменить содержимое визитки: правки в `prisma/seed.ts`, затем `npx prisma db seed`.
