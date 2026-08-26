@@ -1,6 +1,6 @@
 # Цифровая визитка — Сергей Нечаев
 
-Публичный профиль разработчика. Backend: NestJS, GraphQL, Prisma, CockroachDB.
+Публичный профиль разработчика. Backend: NestJS, GraphQL, Prisma, CockroachDB. Frontend: Vite + React.
 
 API только для чтения. Данные меняются через Prisma seed, не через GraphQL.
 
@@ -11,7 +11,7 @@ API только для чтения. Данные меняются через P
 - Prisma
 - CockroachDB
 - Docker Compose (база)
-- Vite + React (статический клиент в `client/`)
+- Vite + React (`client/`)
 
 ## Требования
 
@@ -21,31 +21,31 @@ API только для чтения. Данные меняются через P
 
 ## Запуск
 
+Первый раз:
+
 ```powershell
 cd sergey-nechaev-profile
 copy .env.example .env
-docker compose up -d
 npm install
-npm --prefix client install
-npx prisma migrate deploy
-npx prisma generate
-npx prisma db seed
-npm run start:dev
+npm run setup
+npm run dev
 ```
 
-Во втором терминале:
+`npm install` ставит зависимости бэкенда и фронта.  
+`npm run setup` поднимает CockroachDB, применяет миграции и заполняет seed.  
+`npm run dev` поднимает API и визитку вместе.
+
+Дальше достаточно:
 
 ```powershell
-npm run client:dev
+npm run dev
 ```
 
-API: http://localhost:3000  
-GraphQL (GraphiQL): http://localhost:3000/graphql  
-Визитка: http://localhost:5173  
+- Визитка: http://localhost:5173
+- API / GraphiQL: http://localhost:3000/graphql
+- Cockroach UI: http://localhost:8080
 
 Локально Vite проксирует `/graphql` на API.
-
-Cockroach UI: http://localhost:8080
 
 `DATABASE_URL` и `PORT` задаются в `.env`. Файл `.env` в Git не коммитится.
 
@@ -91,14 +91,16 @@ Cockroach UI: http://localhost:8080
 
 | Команда | Назначение |
 |---|---|
-| `npm run start:dev` | API в watch-режиме |
-| `npm run build` | Сборка |
+| `npm run dev` | База + API + фронт |
+| `npm run setup` | Миграции и seed |
+| `npm run start:dev` | Только API |
+| `npm run client:dev` | Только фронт |
+| `npm run build` | Сборка API |
 | `npm run start:prod` | Запуск собранного `dist` |
 | `npm test` | Unit-тесты |
 | `npm run test:e2e` | GraphQL e2e |
-| `npx prisma db seed` | Заполнить/обновить данные профиля |
+| `npx prisma db seed` | Обновить данные профиля |
 | `npx prisma studio` | Просмотр БД |
-| `npm run client:dev` | Фронт Vite, http://localhost:5173 |
 | `npm run client:build` | Сборка статики в `client/dist` |
 | `npm --prefix client run lint` | ESLint Airbnb для `client/src` |
 

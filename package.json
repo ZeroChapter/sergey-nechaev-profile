@@ -19,7 +19,11 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "client:dev": "npm --prefix client run dev",
-    "client:build": "npm --prefix client run build"
+    "client:build": "npm --prefix client run build",
+    "postinstall": "npm --prefix client install",
+    "db:up": "docker compose up -d",
+    "setup": "npm run db:up && npx prisma migrate deploy && npx prisma generate && npx prisma db seed",
+    "dev": "npm run db:up && concurrently -k -n api,web -c cyan,magenta \"npm run start:dev\" \"npm run client:dev\""
   },
   "dependencies": {
     "@apollo/server": "^5.5.1",
@@ -47,6 +51,7 @@
     "@types/node": "^24.0.0",
     "@types/pg": "^8.23.1",
     "@types/supertest": "^7.0.0",
+    "concurrently": "^10.0.5",
     "dotenv": "^17.4.2",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
