@@ -12,7 +12,7 @@ export default function useProfile() {
 
     const load = async () => {
       let lastError: unknown;
-      for (let attempt = 0; attempt < 8; attempt += 1) {
+      for (let attempt = 0; attempt < 60; attempt += 1) {
         try {
           const data = await fetchProfile(controller.signal);
           setProfile(data);
@@ -23,15 +23,17 @@ export default function useProfile() {
             return;
           }
           await new Promise((resolve) => {
-            setTimeout(resolve, 2000);
+            setTimeout(resolve, 3000);
           });
         }
       }
 
       setError(
-        lastError instanceof Error
-          ? lastError.message
-          : 'Не удалось загрузить профиль',
+        lastError instanceof Error && lastError.message === 'STARTING'
+          ? 'Сервис ещё запускается. Обновите страницу через минуту.'
+          : lastError instanceof Error
+            ? lastError.message
+            : 'Не удалось загрузить профиль',
       );
     };
 

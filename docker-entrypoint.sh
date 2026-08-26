@@ -20,7 +20,7 @@ if [ "${SKIP_EMBEDDED_COCKROACH:-}" != "true" ]; then
     --http-addr=127.0.0.1:8080 \
     --store=/tmp/cockroach-data \
     --cache=32MiB \
-    --max-sql-memory=32MiB \
+    --max-sql-memory=64MiB \
     --background
 fi
 

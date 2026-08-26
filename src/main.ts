@@ -41,8 +41,11 @@ async function waitForCockroach() {
 
 async function prepareDatabase() {
   const prisma = join(process.cwd(), 'node_modules', '.bin', 'prisma');
+  console.log('Running prisma migrate deploy');
   await run(prisma, ['migrate', 'deploy']);
+  console.log('Running prisma seed');
   await run(process.execPath, [join(process.cwd(), 'dist', 'seed.js')]);
+  console.log('Database ready');
 }
 
 function serveClient(expressApp: express.Express) {
@@ -110,6 +113,7 @@ async function bootstrap() {
   app.enableCors();
   await app.init();
   nestReady = true;
+  console.log('GraphQL ready');
 }
 
 bootstrap().catch((error: unknown) => {

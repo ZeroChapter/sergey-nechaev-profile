@@ -84,6 +84,10 @@ export async function fetchProfile(signal?: AbortSignal): Promise<Profile | null
     signal,
   });
 
+  if (response.status === 503) {
+    throw new Error('STARTING');
+  }
+
   if (!response.ok) {
     throw new Error(`GraphQL request failed: ${response.status}`);
   }
