@@ -10,19 +10,33 @@ export default function useProfile() {
   useEffect(() => {
     const controller = new AbortController();
 
-    fetchProfile(controller.signal)
-      .then((data) => {
-        setProfile(data);
-      })
-      .catch((reason: unknown) => {
-        if (reason instanceof DOMException && reason.name === 'AbortError') {
+    const load = async () => {
+      let lastError: unknown;
+      for (let attempt = 0; attempt < 8; attempt += 1) {
+        try {
+          const data = await fetchProfile(controller.signal);
+          setProfile(data);
           return;
+        } catch (reason: unknown) {
+          lastError = reason;
+          if (reason instanceof DOMException && reason.name === 'AbortError') {
+            return;
+          }
+          await new Promise((resolve) => {
+            setTimeout(resolve, 2000);
+          });
         }
+      }
 
-        setError(
-          reason instanceof Error ? reason.message : 'Не удалось загрузить профиль',
-        );
-      })
+      setError(
+        lastError instanceof Error
+          ? lastError.message
+          : 'Не удалось загрузить профиль',
+      );
+    };
+
+    load()
+      .catch(() => undefined)
       .finally(() => {
         if (!controller.signal.aborted) {
           setLoading(false);

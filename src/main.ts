@@ -1,11 +1,27 @@
 import 'dotenv/config';
+import { spawn, execFileSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { createServer } from 'node:http';
-import { execFileSync } from 'node:child_process';
+import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import express from 'express';
 
-const BOOT_HTML =
-  '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="3"><title>Starting</title>starting';
+function run(command: string, args: string[]) {
+  return new Promise<void>((resolve, reject) => {
+    const child = spawn(command, args, {
+      stdio: 'inherit',
+      env: process.env,
+    });
+    child.on('error', reject);
+    child.on('exit', (code) => {
+      if (code === 0) {
+        resolve();
+        return;
+      }
+      reject(new Error(`${command} ${args.join(' ')} exited with ${code}`));
+    });
+  });
+}
 
 async function waitForCockroach() {
   for (let i = 0; i < 60; i += 1) {
@@ -23,9 +39,34 @@ async function waitForCockroach() {
   throw new Error('CockroachDB did not become ready');
 }
 
-function prepareDatabase() {
-  execFileSync('npx', ['prisma', 'migrate', 'deploy'], { stdio: 'inherit' });
-  execFileSync(process.execPath, ['dist/seed.js'], { stdio: 'inherit' });
+async function prepareDatabase() {
+  const prisma = join(process.cwd(), 'node_modules', '.bin', 'prisma');
+  await run(prisma, ['migrate', 'deploy']);
+  await run(process.execPath, [join(process.cwd(), 'dist', 'seed.js')]);
+}
+
+function serveClient(expressApp: express.Express) {
+  const clientDist = join(process.cwd(), 'client', 'dist');
+  if (!existsSync(clientDist)) {
+    return;
+  }
+
+  expressApp.use(express.static(clientDist));
+  expressApp.use((req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      next();
+      return;
+    }
+    if (req.path.startsWith('/graphql')) {
+      next();
+      return;
+    }
+    res.sendFile(join(clientDist, 'index.html'), (error) => {
+      if (error) {
+        next(error);
+      }
+    });
+  });
 }
 
 async function bootstrap() {
@@ -33,13 +74,14 @@ async function bootstrap() {
   const expressApp = express();
   let nestReady = false;
 
-  expressApp.use((_req, res, next) => {
+  expressApp.use('/graphql', (_req, res, next) => {
     if (nestReady) {
       next();
       return;
     }
-    res.status(200).type('html').send(BOOT_HTML);
+    res.status(503).json({ error: 'starting' });
   });
+  serveClient(expressApp);
 
   const httpServer = createServer(expressApp);
   await new Promise<void>((resolve, reject) => {
@@ -53,7 +95,7 @@ async function bootstrap() {
     if (process.env.SKIP_EMBEDDED_COCKROACH !== 'true') {
       await waitForCockroach();
     }
-    prepareDatabase();
+    await prepareDatabase();
   }
 
   const { NestFactory } = await import('@nestjs/core');
