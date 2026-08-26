@@ -3,7 +3,7 @@ set -e
 
 export DATABASE_URL="${DATABASE_URL:-postgresql://root@127.0.0.1:26257/defaultdb?sslmode=disable}"
 export PORT="${PORT:-3000}"
-export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=128}"
+export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=96}"
 
 if [ "${SKIP_EMBEDDED_COCKROACH:-}" != "true" ]; then
   mkdir -p /tmp/cockroach-data

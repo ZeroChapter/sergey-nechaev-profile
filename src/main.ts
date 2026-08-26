@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { spawn, execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -39,12 +39,43 @@ async function waitForCockroach() {
   throw new Error('CockroachDB did not become ready');
 }
 
+async function applySqlMigrations() {
+  const migrationsDir = join(process.cwd(), 'prisma', 'migrations');
+  const dirs = readdirSync(migrationsDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+
+  for (const dir of dirs) {
+    const file = join(migrationsDir, dir, 'migration.sql');
+    if (!existsSync(file)) {
+      continue;
+    }
+    console.log(`Applying ${dir}`);
+    await run('cockroach', [
+      'sql',
+      '--insecure',
+      '--host=127.0.0.1',
+      '--port=26257',
+      '-f',
+      file,
+    ]);
+  }
+}
+
 async function prepareDatabase() {
-  const prisma = join(process.cwd(), 'node_modules', '.bin', 'prisma');
-  console.log('Running prisma migrate deploy');
-  await run(prisma, ['migrate', 'deploy']);
+  if (process.env.SKIP_EMBEDDED_COCKROACH === 'true') {
+    const prisma = join(process.cwd(), 'node_modules', '.bin', 'prisma');
+    console.log('Running prisma migrate deploy');
+    await run(prisma, ['migrate', 'deploy']);
+  } else {
+    await applySqlMigrations();
+  }
   console.log('Running prisma seed');
-  await run(process.execPath, [join(process.cwd(), 'dist', 'seed.js')]);
+  await run(process.execPath, [
+    '--max-old-space-size=64',
+    join(process.cwd(), 'dist', 'seed.js'),
+  ]);
   console.log('Database ready');
 }
 
