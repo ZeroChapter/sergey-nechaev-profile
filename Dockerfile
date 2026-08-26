@@ -13,7 +13,8 @@ RUN npm ci
 COPY . .
 RUN npx prisma generate \
   && npm --prefix client run build \
-  && npm run build
+  && npm run build \
+  && node -e "const ts=require('typescript');const fs=require('fs');const r=ts.transpileModule(fs.readFileSync('prisma/seed.ts','utf8'),{compilerOptions:{module:1,esModuleInterop:true,target:9}});fs.mkdirSync('dist',{recursive:true});fs.writeFileSync('dist/seed.js',r.outputText);"
 
 FROM node:22-bookworm-slim AS runner
 

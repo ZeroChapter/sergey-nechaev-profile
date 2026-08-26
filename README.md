@@ -123,6 +123,6 @@ npm run dev
 
 Визитка: `https://<service>.onrender.com`, GraphQL: `/graphql`.
 
-Free-инстанс — 512 MB RAM. Cockroach ограничен `--cache=64MiB` / `--max-sql-memory=128MiB`. Если сервис падает с OOM, поднимите план выше Free.
+Free-инстанс — 512 MB RAM. Предыдущий деплой упал с OOM: рядом с Cockroach запускался `tsx` seed. Сейчас seed — обычный `node dist/seed.js`, у Cockroach `--cache=32MiB` / `--max-sql-memory=32MiB`, у Node `--max-old-space-size=128`. Если снова OOM — поднимите план выше Free.
 
 Чтобы использовать внешнюю базу: задайте `DATABASE_URL` и `SKIP_EMBEDDED_COCKROACH=true`.
