@@ -2,8 +2,11 @@ import { join } from 'node:path';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProfileModule } from './profile/profile.module';
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 @Module({
   imports: [
@@ -16,6 +19,14 @@ import { ProfileModule } from './profile/profile.module';
       graphiql: true,
       introspection: true,
     }),
+    ...(isProduction
+      ? [
+          ServeStaticModule.forRoot({
+            rootPath: join(__dirname, '..', 'client', 'dist'),
+            exclude: ['/graphql', '/graphql/(.*)'],
+          }),
+        ]
+      : []),
   ],
 })
 export class AppModule {}

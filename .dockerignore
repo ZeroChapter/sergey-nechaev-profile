@@ -1,0 +1,15 @@
+node_modules
+client/node_modules
+dist
+client/dist
+generated
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+coverage
+.serena
+*.log
+.vscode
+docs

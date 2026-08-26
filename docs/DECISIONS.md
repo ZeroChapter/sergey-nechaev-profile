@@ -363,7 +363,7 @@ The public UI is a Vite + React + TypeScript app in `client/`.
 
 It loads the singleton profile with one `fetch` to `POST /graphql`. There is no Next.js, Apollo Client, router, or design system.
 
-Locally Vite proxies `/graphql` to the Nest API (`http://localhost:3000`). Production hosting of the built static files is a later deploy step, not extra frontend architecture.
+Locally Vite proxies `/graphql` to the Nest API (`http://localhost:3000`). In production Nest serves `client/dist` from the same process so one Render URL is enough.
 
 This supersedes Decision 2 where the frontend was deferred until after a stable GraphQL API.
 
@@ -379,4 +379,4 @@ React + Vite is familiar next to Nest, cheap to run, and does not pull in SSR or
 
 - Do not add routing, state libraries, CSS frameworks, or GraphQL codegen unless a concrete UI need appears.
 - The client talks to the existing `profile` query only.
-- Nest does not serve `client/dist` until deploy wiring is actually needed.
+- In production Nest serves `client/dist` so the SPA and GraphQL share one origin. Locally Vite still proxies `/graphql`.

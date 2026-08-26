@@ -105,3 +105,24 @@ npm run dev
 | `npm --prefix client run lint` | ESLint Airbnb для `client/src` |
 
 Изменить содержимое визитки: правки в `prisma/seed.ts`, затем `npx prisma db seed`.
+
+## Деплой на Render
+
+Один Docker-контейнер: Nest + одноузловой CockroachDB в том же образе.
+
+База не вынесена в CockroachDB Cloud: страница входа/регистрации отвечала **403** вместо формы, зарегистрироваться не получилось. Render не запускает `docker compose`, поэтому Cockroach стартует внутри того же контейнера, что и API.
+
+1. Запушьте репозиторий на GitHub.
+2. Render: **New → Web Service** → этот репозиторий.
+3. Runtime: **Docker**. Plan: **Free**.
+4. `NODE_ENV=production`. `PORT` Render задаёт сам. `DATABASE_URL` не нужен — контейнер поднимает Cockroach на `127.0.0.1:26257`.
+
+Либо Blueprint из `render.yaml`.
+
+При старте: Cockroach → `prisma migrate deploy` → seed → API. Данные на диске эфемерные и заново сидятся после сна/деплоя — для демо это ожидаемо.
+
+Визитка: `https://<service>.onrender.com`, GraphQL: `/graphql`.
+
+Free-инстанс — 512 MB RAM. Cockroach ограничен `--cache=64MiB` / `--max-sql-memory=128MiB`. Если сервис падает с OOM, поднимите план выше Free.
+
+Чтобы использовать внешнюю базу: задайте `DATABASE_URL` и `SKIP_EMBEDDED_COCKROACH=true`.
