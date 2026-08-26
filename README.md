@@ -119,7 +119,7 @@ npm run dev
 
 Либо Blueprint из `render.yaml`.
 
-При старте: Cockroach → `prisma migrate deploy` → seed → API. Данные на диске эфемерные и заново сидятся после сна/деплоя — для демо это ожидаемо.
+При старте на порту сразу отвечает API-процесс (пока база не готова, короткое `starting` с автообновлением). Потом: Cockroach → migrate → seed → визитка. Данные эфемерные и заново сидятся после сна/деплоя.
 
 Визитка: `https://<service>.onrender.com`, GraphQL: `/graphql`.
 
