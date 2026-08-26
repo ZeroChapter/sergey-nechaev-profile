@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { spawn, execFileSync } from 'node:child_process';
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -40,27 +40,16 @@ async function waitForCockroach() {
 }
 
 async function applySqlMigrations() {
-  const migrationsDir = join(process.cwd(), 'prisma', 'migrations');
-  const dirs = readdirSync(migrationsDir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .sort();
-
-  for (const dir of dirs) {
-    const file = join(migrationsDir, dir, 'migration.sql');
-    if (!existsSync(file)) {
-      continue;
-    }
-    console.log(`Applying ${dir}`);
-    await run('cockroach', [
-      'sql',
-      '--insecure',
-      '--host=127.0.0.1',
-      '--port=26257',
-      '-f',
-      file,
-    ]);
-  }
+  const file = join(process.cwd(), 'prisma', 'init.sql');
+  console.log('Applying prisma/init.sql');
+  await run('cockroach', [
+    'sql',
+    '--insecure',
+    '--host=127.0.0.1',
+    '--port=26257',
+    '-f',
+    file,
+  ]);
 }
 
 async function prepareDatabase() {
